@@ -845,8 +845,8 @@
             </button>
             <nav>
                 <ul id="navMenu">
-                    <li><a href="/" id="homeLink">Home</a></li>
-                    <li><a href="/about" id="aboutLink">About Us</a></li>
+                    <li><a href="#/" id="homeLink">Home</a></li>
+                    <li><a href="#about" id="aboutLink">About Us</a></li>
                     <li><a href="#" class="nav-button">Login</a></li>
                     <li><a href="#" class="nav-button">Sign Up</a></li>
                 </ul>
@@ -1017,14 +1017,14 @@
             'department': 'Department Placement Results'
         };
 
-        // URL path mapping
-        const urlPaths = {
-            'ngat': '/ngat-placement',
-            'exit-exam': '/exit-exam-placement',
-            'remedial': '/remedial-exam-placement',
-            'exit-results': '/exit-exam-results',
-            'remedial-results': '/remedial-exam-results',
-            'department': '/department-placement'
+        // Hash-based URL mapping
+        const hashPaths = {
+            'ngat': '#/ngat-placement',
+            'exit-exam': '#/exit-exam-placement',
+            'remedial': '#/remedial-exam-placement',
+            'exit-results': '#/exit-exam-results',
+            'remedial-results': '#/remedial-exam-results',
+            'department': '#/department-placement'
         };
 
         // CSV file mapping
@@ -1052,10 +1052,10 @@
             }
         });
 
-        // Navigation links
+        // Navigation links - updated for hash routing
         document.getElementById('homeLink').addEventListener('click', function(e) {
             e.preventDefault();
-            showPage('page1', '/');
+            showPage('page1', '#/');
         });
 
         document.getElementById('aboutLink').addEventListener('click', function(e) {
@@ -1089,8 +1089,8 @@
                 document.getElementById('validationMessage').textContent = '';
                 document.getElementById('passwordValidationMessage').textContent = '';
                 
-                // Show page 2, hide page 1
-                showPage('page2', urlPaths[selectedExam]);
+                // Show page 2 using hash routing
+                showPage('page2', hashPaths[selectedExam]);
                 
                 // Focus on username input
                 document.getElementById('usernameInput').focus();
@@ -1099,7 +1099,7 @@
 
         // Page 2: Back button
         document.getElementById('backToSelectionBtn').addEventListener('click', function() {
-            showPage('page1', '/');
+            showPage('page1', '#/');
         });
 
         // Page 2: Search functionality
@@ -1120,24 +1120,24 @@
 
         // Page 3: Back button
         document.getElementById('backToUsernameBtn').addEventListener('click', function() {
-            showPage('page2', urlPaths[selectedExam]);
+            showPage('page2', hashPaths[selectedExam]);
         });
 
         // Page 3: New Search button
         document.getElementById('newSearchBtn').addEventListener('click', function() {
-            showPage('page1', '/');
+            showPage('page1', '#/');
             
             // Reset selection
             selectedExam = '';
         });
 
-        // Browser back button functionality
-        window.addEventListener('popstate', function(event) {
-            navigateBack();
+        // Hash-based routing functionality
+        window.addEventListener('hashchange', function() {
+            handleRoute(window.location.hash);
         });
 
-        // Page navigation function
-        function showPage(pageId, path) {
+        // Page navigation function - updated for hash routing
+        function showPage(pageId, hash) {
             // Hide all pages
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
@@ -1146,37 +1146,24 @@
             // Show the requested page
             document.getElementById(pageId).classList.add('active');
             
-            // Update URL with descriptive path
-            if (path) {
-                window.history.pushState({page: pageId}, '', path);
-            } else {
-                window.history.pushState({page: pageId}, '', '/');
+            // Update URL hash
+            if (hash && window.location.hash !== hash) {
+                window.location.hash = hash;
             }
             
             // Update page 3 title based on selected exam
             if (pageId === 'page3' && selectedExam) {
                 document.getElementById('page3-exam-type').textContent = examTitles[selectedExam];
             }
-        }
-
-        function navigateBack() {
-            const page3 = document.getElementById('page3');
-            const page2 = document.getElementById('page2');
-            const page1 = document.getElementById('page1');
             
-            if (page3.classList.contains('active')) {
-                showPage('page2', urlPaths[selectedExam]);
-            } else if (page2.classList.contains('active')) {
-                showPage('page1', '/');
-            }
+            // Scroll to top when changing pages
+            window.scrollTo(0, 0);
         }
 
-        // Initialize browser history
-        window.history.replaceState({page: 'page1'}, '', '/');
-
-        // Handle direct URL access
-        window.addEventListener('load', function() {
-            const path = window.location.pathname;
+        // Route handler function
+        function handleRoute(hash) {
+            // Remove the # from the hash
+            const path = hash.substring(1) || '/';
             
             // Map URL paths to exam types
             const pathToExam = {
@@ -1189,7 +1176,7 @@
             };
             
             if (path === '/' || path === '/home') {
-                showPage('page1', '/');
+                showPage('page1', hash);
             } else if (pathToExam[path]) {
                 selectedExam = pathToExam[path];
                 
@@ -1206,9 +1193,22 @@
                     passwordField.style.display = 'none';
                 }
                 
-                showPage('page2', path);
+                showPage('page2', hash);
             } else if (path === '/about') {
                 document.getElementById('siteFooter').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                // Handle unknown routes by showing page 1
+                showPage('page1', '#/');
+            }
+        }
+
+        // Initialize routing on page load
+        window.addEventListener('load', function() {
+            handleRoute(window.location.hash);
+            
+            // If no hash is present, set default hash
+            if (!window.location.hash) {
+                window.location.hash = '#/';
             }
         });
 
@@ -1388,8 +1388,8 @@
                     
                     resultDiv.innerHTML = resultHTML;
                     
-                    // Show page 3, hide page 2
-                    showPage('page3', urlPaths[selectedExam] + '/results');
+                    // Show page 3 with results hash
+                    showPage('page3', hashPaths[selectedExam] + '/results');
                 } else {
                     // Show error message on Page 2 (not on Page 3)
                     validationMessage.textContent = `No student found with username: ${username}`;
@@ -1501,8 +1501,8 @@
                     
                     resultDiv.innerHTML = resultHTML;
                     
-                    // Show page 3, hide page 2
-                    showPage('page3', urlPaths[selectedExam] + '/results');
+                    // Show page 3 with results hash
+                    showPage('page3', hashPaths[selectedExam] + '/results');
                 } else {
                     // Show error message on Page 2 (not on Page 3)
                     validationMessage.textContent = `No student found with username: ${username}`;
