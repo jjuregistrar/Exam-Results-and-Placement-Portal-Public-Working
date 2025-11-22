@@ -857,9 +857,6 @@
     <div class="main-content">
         <!-- Page 1: Exam Selection -->
         <div class="card page active" id="page1">
-            <img src="https://i.ibb.co/0j2mgMBp/JJU-LOGO.png" alt="Jigjiga University Logo" class="logo" />
-            <h1>Jigjiga University</h1>
-            <h2>Registrar and Alumni Directorate</h2>
             <div class="pink">Welcome to the Exam Results and Placement Portal</div>
 
             <div class="instructions">Please select the option below to continue.</div>
@@ -940,9 +937,6 @@
 
         <!-- Page 2: Username Entry -->
         <div class="card page" id="page2">
-            <img src="https://i.ibb.co/0j2mgMBp/JJU-LOGO.png" alt="Jigjiga University Logo" class="logo" />
-            <h1 id="page2-title">Jigjiga University</h1>
-            <h2 id="page2-subtitle">Registrar and Alumni Directorate</h2>
             <div class="pink" id="page2-exam-type">Exam Placement</div>
 
             <div class="instructions" id="page2-instructions">Enter your username to find your exam details</div>
@@ -972,9 +966,6 @@
 
         <!-- Page 3: Results Display -->
         <div class="card page" id="page3">
-            <img src="https://i.ibb.co/0j2mgMBp/JJU-LOGO.png" alt="Jigjiga University Logo" class="logo" />
-            <h1 id="page3-title">Jigjiga University</h1>
-            <h2 id="page3-subtitle">Registrar and Alumni Directorate</h2>
             <div class="pink" id="page3-exam-type">Exam Results</div>
 
             <div id="result"></div>
@@ -1081,8 +1072,6 @@
                 selectedExam = this.getAttribute('data-exam');
                 
                 // Update page 2 content based on selection
-                document.getElementById('page2-title').textContent = 'Jigjiga University';
-                document.getElementById('page2-subtitle').textContent = 'Registrar and Alumni Directorate';
                 document.getElementById('page2-exam-type').textContent = examTitles[selectedExam];
                 document.getElementById('page2-instructions').textContent = 
                     `Enter your username to find your ${examTitles[selectedExam].toLowerCase()} details`;
@@ -1205,8 +1194,6 @@
                 selectedExam = pathToExam[path];
                 
                 // Update page 2 content based on selection
-                document.getElementById('page2-title').textContent = 'Jigjiga University';
-                document.getElementById('page2-subtitle').textContent = 'Registrar and Alumni Directorate';
                 document.getElementById('page2-exam-type').textContent = examTitles[selectedExam];
                 document.getElementById('page2-instructions').textContent = 
                     `Enter your username to find your ${examTitles[selectedExam].toLowerCase()} details`;
@@ -1302,10 +1289,6 @@
                         }
                     }
                 }
-                
-                // Update page 3 content
-                document.getElementById('page3-title').textContent = 'Jigjiga University';
-                document.getElementById('page3-subtitle').textContent = 'Registrar and Alumni Directorate';
                 
                 // Set specific title for each exam type
                 document.getElementById('page3-exam-type').textContent = examTitles[selectedExam];
