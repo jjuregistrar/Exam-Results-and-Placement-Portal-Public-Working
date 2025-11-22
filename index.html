@@ -1302,18 +1302,12 @@
                     }
                 }
                 
-                // Update page 3 content
+                // Update page 3 content - FIX: Use the same title as page 2
                 document.getElementById('page3-title').textContent = 'Jigjiga University';
                 document.getElementById('page3-subtitle').textContent = 'Registrar and Alumni Directorate';
                 
-                // Set STATIC titles for specific exam types
-                if (selectedExam === 'exit-results') {
-                    document.getElementById('page3-exam-type').textContent = 'Exit Exam Results';
-                } else if (selectedExam === 'remedial-results') {
-                    document.getElementById('page3-exam-type').textContent = 'Remedial Exam Results';
-                } else {
-                    document.getElementById('page3-exam-type').textContent = examTitles[selectedExam];
-                }
+                // FIX: Use the specific exam title instead of generic "Exam Results"
+                document.getElementById('page3-exam-type').textContent = examTitles[selectedExam];
                 
                 // Display results
                 if (studentFound) {
