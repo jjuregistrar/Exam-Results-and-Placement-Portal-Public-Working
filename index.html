@@ -6,7 +6,6 @@
     <title>Jigjiga University Exam Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Your existing CSS styles remain unchanged */
         * {
             margin: 0;
             padding: 0;
@@ -143,7 +142,7 @@
             background: 
                 /* Subtle vignette effect */
                 radial-gradient(ellipse at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 100%),
-                /* Subtle light spots */
+                /* Subtple light spots */
                 radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
                 radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
             z-index: -1;
@@ -846,8 +845,8 @@
             </button>
             <nav>
                 <ul id="navMenu">
-                    <li><a href="/" id="homeLink">Home</a></li>
-                    <li><a href="/about" id="aboutLink">About Us</a></li>
+                    <li><a href="https://jjuregistrar.github.io/Exam-Results-and-Placement-Portal-Public-Working/" id="homeLink">Home</a></li>
+                    <li><a href="https://jjuregistrar.github.io/Exam-Results-and-Placement-Portal-Public-Working/about" id="aboutLink">About Us</a></li>
                     <li><a href="#" class="nav-button">Login</a></li>
                     <li><a href="#" class="nav-button">Sign Up</a></li>
                 </ul>
@@ -1027,6 +1026,9 @@
             'department': 'Department Placement Results'
         };
 
+        // Base URL for the GitHub Pages site
+        const baseUrl = 'https://jjuregistrar.github.io/Exam-Results-and-Placement-Portal-Public-Working';
+
         // URL mapping for clean URLs
         const urlMapping = {
             '/': 'page1',
@@ -1068,12 +1070,12 @@
         // Navigation links
         document.getElementById('homeLink').addEventListener('click', function(e) {
             e.preventDefault();
-            navigateTo('/');
+            window.location.href = baseUrl + '/';
         });
 
         document.getElementById('aboutLink').addEventListener('click', function(e) {
             e.preventDefault();
-            navigateTo('/about');
+            window.location.href = baseUrl + '/about';
         });
 
         // Page 1: Direct Exam Selection (One-Click Navigation)
@@ -1084,15 +1086,15 @@
                 // Store selected exam
                 selectedExam = this.getAttribute('data-exam');
                 
-                // Navigate to the appropriate URL
+                // Navigate to the appropriate URL with full path
                 const url = getUrlForExam(selectedExam);
-                navigateTo(url);
+                window.location.href = baseUrl + url;
             });
         });
 
         // Page 2: Back button
         document.getElementById('backToSelectionBtn').addEventListener('click', function() {
-            navigateTo('/');
+            window.location.href = baseUrl + '/';
         });
 
         // Page 2: Search functionality
@@ -1114,12 +1116,12 @@
         // Page 3: Back button
         document.getElementById('backToUsernameBtn').addEventListener('click', function() {
             const url = getUrlForExam(selectedExam);
-            navigateTo(url);
+            window.location.href = baseUrl + url;
         });
 
         // Page 3: New Search button
         document.getElementById('newSearchBtn').addEventListener('click', function() {
-            navigateTo('/');
+            window.location.href = baseUrl + '/';
             
             // Reset selection
             selectedExam = '';
@@ -1138,7 +1140,15 @@
         // Route handling function
         function handleRouteChange() {
             const path = window.location.pathname;
-            const pageId = urlMapping[path] || 'page1';
+            // Extract the path after the repository name
+            const repoPath = '/Exam-Results-and-Placement-Portal-Public-Working';
+            let relativePath = path;
+            
+            if (path.startsWith(repoPath)) {
+                relativePath = path.substring(repoPath.length) || '/';
+            }
+            
+            const pageId = urlMapping[relativePath] || 'page1';
             
             // Hide all pages
             document.querySelectorAll('.page').forEach(page => {
@@ -1150,14 +1160,14 @@
                 document.getElementById('page1').classList.add('active');
             } else if (pageId === 'page2') {
                 // Determine which exam type based on URL
-                const examType = getExamFromUrl(path);
+                const examType = getExamFromUrl(relativePath);
                 if (examType) {
                     selectedExam = examType;
                     setupPage2(examType);
                     document.getElementById('page2').classList.add('active');
                 } else {
                     // Fallback to home page if exam type not found
-                    navigateTo('/');
+                    window.location.href = baseUrl + '/';
                 }
             } else if (pageId === 'about') {
                 // For now, just scroll to footer
@@ -1165,12 +1175,6 @@
                 // Show home page
                 document.getElementById('page1').classList.add('active');
             }
-        }
-
-        // Navigation function
-        function navigateTo(url) {
-            window.history.pushState({}, '', url);
-            handleRouteChange();
         }
 
         // Get URL for exam type
@@ -1302,11 +1306,11 @@
                     }
                 }
                 
-                // Update page 3 content - FIX: Use the same title as page 2
+                // Update page 3 content - FIXED: Use the same title as page 2
                 document.getElementById('page3-title').textContent = 'Jigjiga University';
                 document.getElementById('page3-subtitle').textContent = 'Registrar and Alumni Directorate';
                 
-                // FIX: Use the specific exam title instead of generic "Exam Results"
+                // FIXED: Always use the specific exam title
                 document.getElementById('page3-exam-type').textContent = examTitles[selectedExam];
                 
                 // Display results
