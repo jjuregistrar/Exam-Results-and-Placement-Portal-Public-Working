@@ -845,8 +845,8 @@
             </button>
             <nav>
                 <ul id="navMenu">
-                    <li><a href="#" id="homeLink">Home</a></li>
-                    <li><a href="#" id="aboutLink">About Us</a></li>
+                    <li><a href="/" id="homeLink">Home</a></li>
+                    <li><a href="/about" id="aboutLink">About Us</a></li>
                     <li><a href="#" class="nav-button">Login</a></li>
                     <li><a href="#" class="nav-button">Sign Up</a></li>
                 </ul>
@@ -1026,6 +1026,16 @@
             'department': 'Department Placement Results'
         };
 
+        // URL path mapping
+        const urlPaths = {
+            'ngat': '/ngat-placement',
+            'exit-exam': '/exit-exam-placement',
+            'remedial': '/remedial-exam-placement',
+            'exit-results': '/exit-exam-results',
+            'remedial-results': '/remedial-exam-results',
+            'department': '/department-placement'
+        };
+
         // CSV file mapping
         const csvFiles = {
             'ngat': 'ngat_data.csv',
@@ -1054,9 +1064,7 @@
         // Navigation links
         document.getElementById('homeLink').addEventListener('click', function(e) {
             e.preventDefault();
-            showPage('page1');
-            // Scroll to top of the page
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showPage('page1', '/');
         });
 
         document.getElementById('aboutLink').addEventListener('click', function(e) {
@@ -1093,7 +1101,7 @@
                 document.getElementById('passwordValidationMessage').textContent = '';
                 
                 // Show page 2, hide page 1
-                showPage('page2');
+                showPage('page2', urlPaths[selectedExam]);
                 
                 // Focus on username input
                 document.getElementById('usernameInput').focus();
@@ -1102,7 +1110,7 @@
 
         // Page 2: Back button
         document.getElementById('backToSelectionBtn').addEventListener('click', function() {
-            showPage('page1');
+            showPage('page1', '/');
         });
 
         // Page 2: Search functionality
@@ -1123,12 +1131,12 @@
 
         // Page 3: Back button
         document.getElementById('backToUsernameBtn').addEventListener('click', function() {
-            showPage('page2');
+            showPage('page2', urlPaths[selectedExam]);
         });
 
         // Page 3: New Search button
         document.getElementById('newSearchBtn').addEventListener('click', function() {
-            showPage('page1');
+            showPage('page1', '/');
             
             // Reset selection
             selectedExam = '';
@@ -1140,27 +1148,82 @@
         });
 
         // Page navigation function
-let urlMap = {
-    page1: '/home',
-    page2: '/' + selectedExam + '-placement',
-    page3: '/' + selectedExam + '-results'
-};
+        function showPage(pageId, path) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show the requested page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update URL with descriptive path
+            if (path) {
+                window.history.pushState({page: pageId}, '', path);
+            } else {
+                window.history.pushState({page: pageId}, '', '/');
+            }
+            
+            // Update page 3 title based on selected exam
+            if (pageId === 'page3' && selectedExam) {
+                document.getElementById('page3-exam-type').textContent = examTitles[selectedExam];
+            }
+        }
 
-window.history.pushState({page: pageId}, '', urlMap[pageId]);
         function navigateBack() {
             const page3 = document.getElementById('page3');
             const page2 = document.getElementById('page2');
             const page1 = document.getElementById('page1');
             
             if (page3.classList.contains('active')) {
-                showPage('page2');
+                showPage('page2', urlPaths[selectedExam]);
             } else if (page2.classList.contains('active')) {
-                showPage('page1');
+                showPage('page1', '/');
             }
         }
 
         // Initialize browser history
-        window.history.replaceState({page: 'page1'}, '', '#page1');
+        window.history.replaceState({page: 'page1'}, '', '/');
+
+        // Handle direct URL access
+        window.addEventListener('load', function() {
+            const path = window.location.pathname;
+            
+            // Map URL paths to exam types
+            const pathToExam = {
+                '/ngat-placement': 'ngat',
+                '/exit-exam-placement': 'exit-exam',
+                '/remedial-exam-placement': 'remedial',
+                '/exit-exam-results': 'exit-results',
+                '/remedial-exam-results': 'remedial-results',
+                '/department-placement': 'department'
+            };
+            
+            if (path === '/' || path === '/home') {
+                showPage('page1', '/');
+            } else if (pathToExam[path]) {
+                selectedExam = pathToExam[path];
+                
+                // Update page 2 content based on selection
+                document.getElementById('page2-title').textContent = 'Jigjiga University';
+                document.getElementById('page2-subtitle').textContent = 'Registrar and Alumni Directorate';
+                document.getElementById('page2-exam-type').textContent = examTitles[selectedExam];
+                document.getElementById('page2-instructions').textContent = 
+                    `Enter your username to find your ${examTitles[selectedExam].toLowerCase()} details`;
+                
+                // Show/hide password field based on selection
+                const passwordField = document.getElementById('passwordField');
+                if (selectedExam === 'exit-exam' || selectedExam === 'remedial') {
+                    passwordField.style.display = 'none';
+                } else {
+                    passwordField.style.display = 'none';
+                }
+                
+                showPage('page2', path);
+            } else if (path === '/about') {
+                document.getElementById('siteFooter').scrollIntoView({ behavior: 'smooth' });
+            }
+        });
 
         async function searchStudent() {
             const username = document.getElementById('usernameInput').value.trim().toUpperCase();
@@ -1243,20 +1306,9 @@ window.history.pushState({page: pageId}, '', urlMap[pageId]);
                 // Update page 3 content
                 document.getElementById('page3-title').textContent = 'Jigjiga University';
                 document.getElementById('page3-subtitle').textContent = 'Registrar and Alumni Directorate';
-		
-		let page3TitleMap = {
-   		  'ngat': 'NGAT Placement',
-  		  'exit-exam': 'Exit Exam Placement',
-  		  'remedial': 'Remedial Exam Placement',
- 		  'exit-results': 'Exit Exam Results',
- 		  'remedial-results': 'Remedial Exam Results',
- 		  'department': 'Department Placement Results'
-		};
-
-   
-             
-		document.getElementById('page3-exam-type').textContent = page3TitleMap[selectedExam] || 'Exam Results';
-
+                
+                // Set specific title for each exam type
+                document.getElementById('page3-exam-type').textContent = examTitles[selectedExam];
                 
                 // Display results
                 if (studentFound) {
@@ -1354,7 +1406,7 @@ window.history.pushState({page: pageId}, '', urlMap[pageId]);
                     resultDiv.innerHTML = resultHTML;
                     
                     // Show page 3, hide page 2
-                    showPage('page3');
+                    showPage('page3', urlPaths[selectedExam] + '/results');
                 } else {
                     // Show error message on Page 2 (not on Page 3)
                     validationMessage.textContent = `No student found with username: ${username}`;
@@ -1467,7 +1519,7 @@ window.history.pushState({page: pageId}, '', urlMap[pageId]);
                     resultDiv.innerHTML = resultHTML;
                     
                     // Show page 3, hide page 2
-                    showPage('page3');
+                    showPage('page3', urlPaths[selectedExam] + '/results');
                 } else {
                     // Show error message on Page 2 (not on Page 3)
                     validationMessage.textContent = `No student found with username: ${username}`;
