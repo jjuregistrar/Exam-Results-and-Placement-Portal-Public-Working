@@ -1150,6 +1150,23 @@
                 window.location.hash = hash;
             }
             
+        // Page navigation function - updated for hash routing
+        function showPage(pageId, hash) {
+            console.log('Showing page:', pageId, 'with hash:', hash);
+            
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show the requested page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update URL hash (only if different to avoid unnecessary hashchange events)
+            if (hash && window.location.hash !== hash) {
+                window.location.hash = hash;
+            }
+            
             // Update page 3 title based on selected exam
             if (pageId === 'page3' && selectedExam) {
                 document.getElementById('page3-exam-type').textContent = examTitles[selectedExam];
@@ -1161,6 +1178,8 @@
 
         // Route handler function for GitHub Pages
         function handleRoute(hash) {
+            console.log('Handling route:', hash);
+            
             // Remove the # from the hash
             const path = hash.substring(1) || '/';
             
@@ -1174,10 +1193,14 @@
                 '/department-placement': 'department'
             };
             
+            // Check if this is a results route
+            const isResultsRoute = path.includes('/results');
+            const basePath = isResultsRoute ? path.replace('/results', '') : path;
+            
             if (path === '/' || path === '/home') {
                 showPage('page1', hash);
-            } else if (pathToExam[path]) {
-                selectedExam = pathToExam[path];
+            } else if (pathToExam[basePath]) {
+                selectedExam = pathToExam[basePath];
                 
                 // Update page 2 content based on selection
                 document.getElementById('page2-exam-type').textContent = examTitles[selectedExam];
@@ -1192,7 +1215,14 @@
                     passwordField.style.display = 'none';
                 }
                 
-                showPage('page2', hash);
+                // Show appropriate page based on whether it's a results route
+                if (isResultsRoute) {
+                    // We're coming directly to results, need to handle this case
+                    // For now, redirect to page2 to enter username
+                    showPage('page2', hashPaths[selectedExam]);
+                } else {
+                    showPage('page2', hash);
+                }
             } else if (path === '/about') {
                 document.getElementById('siteFooter').scrollIntoView({ behavior: 'smooth' });
             } else {
@@ -1203,6 +1233,7 @@
 
         // Initialize routing on page load for GitHub Pages
         window.addEventListener('load', function() {
+            console.log('Page loaded, initial hash:', window.location.hash);
             handleRoute(window.location.hash);
             
             // If no hash is present, set default hash
@@ -1211,7 +1242,7 @@
             }
         });
 
-        // Search function (same as before)
+        // Search function - fixed to properly handle page3 navigation
         async function searchStudent() {
             const username = document.getElementById('usernameInput').value.trim().toUpperCase();
             const password = document.getElementById('passwordInput').value.trim();
@@ -1377,7 +1408,17 @@
                     }
                     
                     resultDiv.innerHTML = resultHTML;
-                    showPage('page3', hashPaths[selectedExam] + '/results');
+                    
+                    // IMPORTANT FIX: Show page 3 without triggering hash change
+                    // Hide all pages manually and show page3
+                    document.querySelectorAll('.page').forEach(page => {
+                        page.classList.remove('active');
+                    });
+                    document.getElementById('page3').classList.add('active');
+                    
+                    // Update page 3 title
+                    document.getElementById('page3-exam-type').textContent = examTitles[selectedExam];
+                    
                 } else {
                     validationMessage.textContent = `No student found with username: ${username}`;
                     loadingIndicator.style.display = 'none';
@@ -1388,13 +1429,106 @@
                 
             } catch (error) {
                 console.error('Error searching for student:', error);
+                
+                // Fallback to sample data if CSV loading fails
                 const sampleStudent = getSampleStudent(username, selectedExam, password);
                 if (sampleStudent) {
-                    // Display sample data (same logic as above)
                     let resultHTML = '';
-                    // ... (same sample data display logic as before)
+                    
+                    if (selectedExam.includes('results')) {
+                        const statusClass = sampleStudent.status === 'Pass' ? 'green' : 'red';
+                        resultHTML = `
+                            <div class="result-item"><span class="field-label">Student Name:</span> ${sampleStudent.name}</div>
+                            <div class="result-item"><span class="field-label">Username:</span> ${sampleStudent.username}</div>
+                            <div class="result-item"><span class="field-label">Gender:</span> ${sampleStudent.gender}</div>
+                        `;
+                        
+                        if (selectedExam === 'exit-results') {
+                            resultHTML += `<div class="result-item"><span class="field-label">Department:</span> ${sampleStudent.department}</div>`;
+                        }
+                        
+                        if (selectedExam === 'remedial-results') {
+                            resultHTML += `<div class="result-item"><span class="field-label">Stream:</span> ${sampleStudent.stream}</div>`;
+                        }
+                        
+                        resultHTML += `
+                            <div class="result-item"><span class="field-label">Exam Date:</span> ${sampleStudent.examDate}</div>
+                            <div class="result-item"><span class="field-label">Score:</span> ${sampleStudent.score}</div>
+                            <div class="result-item ${statusClass}"><span class="field-label">Status:</span> ${sampleStudent.status}</div>
+                            <p style="color: orange; margin-top: 10px; font-size: 12px;">Note: Using sample data - CSV file not accessible</p>
+                        `;
+                    } else if (selectedExam === 'department') {
+                        resultHTML = `
+                            <div class="department-info">
+                                <div class="result-item blue"><span class="field-label">Congratulations!</span></div>
+                                <div class="result-item">You have been successfully placed in the following department:</div>
+                            </div>
+                            <div class="result-item"><span class="field-label">Student Name:</span> ${sampleStudent.name}</div>
+                            <div class="result-item"><span class="field-label">Username:</span> ${sampleStudent.username}</div>
+                            <div class="result-item"><span class="field-label">Gender:</span> ${sampleStudent.gender}</div>
+                            <div class="result-item"><span class="field-label">College:</span> ${sampleStudent.college}</div>
+                            <div class="result-item"><span class="field-label">Department:</span> ${sampleStudent.department}</div>
+                            <div class="result-item"><span class="field-label">Program:</span> ${sampleStudent.program}</div>
+                            <div class="result-item"><span class="field-label">Placement Score:</span> ${sampleStudent.score}</div>
+                            <div class="result-item"><span class="field-label">Placement Date:</span> ${sampleStudent.examDate}</div>
+                            <div class="result-item green"><span class="field-label">Status:</span> Successfully Placed</div>
+                            <p style="color: orange; margin-top: 10px; font-size: 12px;">Note: Using sample data - CSV file not accessible</p>
+                        `;
+                    } else if (selectedExam === 'exit-exam' || selectedExam === 'remedial') {
+                        resultHTML = `
+                            <div class="result-item"><span class="field-label">Examinee Name:</span> ${sampleStudent.name}</div>
+                            <div class="result-item"><span class="field-label">Username:</span> ${sampleStudent.username}</div>
+                        `;
+                        
+                        if (selectedExam === 'exit-exam' || selectedExam === 'remedial') {
+                            resultHTML += `<div class="result-item"><span class="field-label">Password:</span> ${sampleStudent.password}</div>`;
+                        }
+                        
+                        resultHTML += `
+                            <div class="result-item"><span class="field-label">Gender:</span> ${sampleStudent.gender}</div>
+                        `;
+                        
+                        if (selectedExam === 'exit-exam') {
+                            resultHTML += `<div class="result-item"><span class="field-label">Department:</span> ${sampleStudent.department}</div>`;
+                        }
+                        
+                        if (selectedExam === 'remedial') {
+                            resultHTML += `<div class="result-item"><span class="field-label">Stream:</span> ${sampleStudent.stream}</div>`;
+                        }
+                        
+                        resultHTML += `
+                            <div class="result-item"><span class="field-label">Exam Date:</span> ${sampleStudent.examDate}</div>
+                            <div class="result-item"><span class="field-label">Session:</span> ${sampleStudent.session}</div>
+                            <div class="result-item"><span class="field-label">Exam Building:</span> ${sampleStudent.building}</div>
+                            <div class="result-item"><span class="field-label">Exam Room:</span> ${sampleStudent.room}</div>
+                            <div class="result-item red"><span class="field-label">Exam Time:</span> ${sampleStudent.time}</div>
+                            <p style="color: orange; margin-top: 10px; font-size: 12px;">Note: Using sample data - CSV file not accessible</p>
+                        `;
+                    } else {
+                        resultHTML = `
+                            <div class="result-item"><span class="field-label">Examinee Name:</span> ${sampleStudent.name}</div>
+                            <div class="result-item"><span class="field-label">Username:</span> ${sampleStudent.username}</div>
+                            <div class="result-item"><span class="field-label">Gender:</span> ${sampleStudent.gender}</div>
+                            <div class="result-item"><span class="field-label">Exam Date:</span> ${sampleStudent.examDate}</div>
+                            <div class="result-item"><span class="field-label">Session:</span> ${sampleStudent.session}</div>
+                            <div class="result-item"><span class="field-label">Exam Building:</span> ${sampleStudent.building}</div>
+                            <div class="result-item"><span class="field-label">Exam Room:</span> ${sampleStudent.room}</div>
+                            <div class="result-item red"><span class="field-label">Exam Time:</span> ${sampleStudent.time}</div>
+                            <p style="color: orange; margin-top: 10px; font-size: 12px;">Note: Using sample data - CSV file not accessible</p>
+                        `;
+                    }
+                    
                     resultDiv.innerHTML = resultHTML;
-                    showPage('page3', hashPaths[selectedExam] + '/results');
+                    
+                    // IMPORTANT FIX: Show page 3 without triggering hash change
+                    document.querySelectorAll('.page').forEach(page => {
+                        page.classList.remove('active');
+                    });
+                    document.getElementById('page3').classList.add('active');
+                    
+                    // Update page 3 title
+                    document.getElementById('page3-exam-type').textContent = examTitles[selectedExam];
+                    
                 } else {
                     validationMessage.textContent = `No student found with username: ${username}`;
                 }
